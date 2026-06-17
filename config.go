@@ -11,10 +11,6 @@ import (
 const defaultWebhookName = "gib"
 const defaultBotName = "gib"
 
-var defaultCleanLinkRegexes = []string{
-	`^(https://www\.instagram\.com/(?:reels?|p)/[a-zA-Z0-9_-]+/).*(?:igsh=[a-zA-Z0-9_-]+).*$`,
-}
-
 type config struct {
 	token       string
 	linkConfig  linkConfig
@@ -61,7 +57,7 @@ func linkPatternsFromEnv() ([]string, error) {
 
 	raw := strings.TrimSpace(os.Getenv("CLEAN_LINK_REGEX"))
 	if raw == "" {
-		return append([]string(nil), defaultCleanLinkRegexes...), nil
+		return []string(nil), errors.New("not set CLEAN_LINK_REGEX")
 	}
 	return parsePatterns(raw)
 }
