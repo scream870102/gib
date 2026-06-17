@@ -16,15 +16,10 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
-const defaultCleanLinkRegex = `(?i)^(https?://(?:www\.)?instagram\.com/[^\s<>()?]+/)\?igsh=[\x21-\x7E]+$`
-const defaultCleanLinkWithSourceRegex = `(?i)^(https?://(?:www\.)?instagram\.com/[^\s<>()?]+/)\?utm_source=ig_web_copy_link&igsh=[\x21-\x7E]+$`
 const defaultWebhookName = "gib"
 const defaultBotName = "gib"
 
-var defaultCleanLinkRegexes = []string{
-	defaultCleanLinkWithSourceRegex,
-	defaultCleanLinkRegex,
-}
+var defaultCleanLinkRegexes = []string{}
 
 type action string
 
@@ -40,7 +35,7 @@ type config struct {
 	patterns    []string
 	action      action
 	webhookName string
-	botName string
+	botName     string
 }
 
 type cleaner struct {
@@ -54,7 +49,7 @@ type bot struct {
 	webhookMu   sync.Mutex
 	webhooks    map[string]*discordgo.Webhook
 	logger      *slog.Logger
-	config	  config
+	config      config
 }
 
 func main() {
@@ -223,17 +218,14 @@ func (c *cleaner) clean(content string) (string, bool) {
 	}
 
 	for _, re := range c.res {
-		match := re.FindStringSubmatch(trimmed)
-		if match == nil || match[0] != trimmed || len(match) < 2 {
+		newMessage := re.ReplaceAllString(trimmed, "${1}")
+
+		newMessage = strings.TrimSpace(newMessage)
+		if newMessage == "" || newMessage == trimmed {
 			continue
 		}
 
-		cleaned := strings.TrimSpace(match[1])
-		if cleaned == "" || cleaned == trimmed {
-			continue
-		}
-
-		return cleaned, true
+		return newMessage, true
 	}
 
 	return "", false
@@ -411,7 +403,7 @@ func (b *bot) editOwnMessage(s *discordgo.Session, event *discordgo.MessageCreat
 	b.logger.Info("edited own message", "channel_id", event.ChannelID, "message_id", event.ID)
 }
 
-func authorDisplayName(event *discordgo.MessageCreate, defaultName string ) string {
+func authorDisplayName(event *discordgo.MessageCreate, defaultName string) string {
 	if event != nil && event.Member != nil {
 		if name := strings.TrimSpace(event.Member.Nick); name != "" {
 			return truncateRunes(name, 80)
