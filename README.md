@@ -23,7 +23,18 @@ BOT_ACTION=reply
 WEBHOOK_NAME=Gib
 ```
 
-`CLEAN_LINK_REGEX` 可以省略；預設已支援以下兩種格式，並保留網址路徑最後的 `/`：
+`CLEAN_LINK_REGEX` 不可以省略；  
+
+推薦給ig用的regex如下
+```text
+(?i)(https?://(?:www\.)?instagram\.com/[^\s<>()?]+/)\?(?:utm_source=[^\s<>()&]+&)?igsh=[^\s<>()&]+
+上面這個是沒有放在Json string裡的格式
+
+如果放在Json string裡要用""包裹 且escape \
+"(?i)(https?://(?:www\\.)?instagram\\.com/[^\\s<>()?]+/)\\?(?:utm_source=[^\\s<>()&]+&)?igsh=[^\\s<>()&]+"
+```
+
+已支援parse以下兩種格式，並保留網址路徑最後的 `/`：
 
 ```text
 https://www.instagram.com/reel/DZq4Uc-Boi8/?utm_source=ig_web_copy_link&igsh=NTc4MwjQ2YQ==
