@@ -6,8 +6,6 @@ import (
 	"fmt"
 	"os"
 	"strings"
-
-	"gib/internal/links" // 假設你的 module 名稱是 gib
 )
 
 const defaultWebhookName = "gib"
@@ -19,7 +17,7 @@ var defaultCleanLinkRegexes = []string{
 
 type config struct {
 	token       string
-	linkConfig  links.Config
+	linkConfig  linkConfig
 	webhookName string
 	botName     string
 }
@@ -30,7 +28,7 @@ func loadConfig() (config, error) {
 		return config{}, errors.New("set DISCORD_BOT_TOKEN")
 	}
 
-	rawAction := strings.ToLower(envOrDefault("BOT_ACTION", string(links.ActionReply)))
+	rawAction := strings.ToLower(envOrDefault("BOT_ACTION", string(ActionReply)))
 	patterns, err := linkPatternsFromEnv()
 	if err != nil {
 		return config{}, err
@@ -38,9 +36,9 @@ func loadConfig() (config, error) {
 
 	cfg := config{
 		token: token,
-		linkConfig: links.Config{
+		linkConfig: linkConfig{
 			Patterns:    patterns,
-			Action:      links.Action(rawAction),
+			Action:      linkAction(rawAction),
 			WebhookName: envOrDefault("WEBHOOK_NAME", defaultWebhookName),
 			BotName:     envOrDefault("DEFAULT_BOT_NAME", defaultBotName),
 		},
@@ -49,7 +47,7 @@ func loadConfig() (config, error) {
 	}
 
 	switch cfg.linkConfig.Action {
-	case links.ActionReply, links.ActionDeleteRepost, links.ActionWebhookRepost, links.ActionEditOwn:
+	case ActionReply, ActionDeleteRepost, ActionWebhookRepost, ActionEditOwn:
 		return cfg, nil
 	default:
 		return config{}, fmt.Errorf("invalid BOT_ACTION")

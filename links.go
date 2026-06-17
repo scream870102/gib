@@ -1,4 +1,4 @@
-package links
+package main
 
 import (
 	"fmt"
@@ -10,18 +10,18 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
-type Action string
+type linkAction string
 
 const (
-	ActionReply         Action = "reply"
-	ActionDeleteRepost  Action = "delete-repost"
-	ActionWebhookRepost Action = "webhook-repost"
-	ActionEditOwn       Action = "edit-own"
+	ActionReply         linkAction = "reply"
+	ActionDeleteRepost  linkAction = "delete-repost"
+	ActionWebhookRepost linkAction = "webhook-repost"
+	ActionEditOwn       linkAction = "edit-own"
 )
 
-type Config struct {
+type linkConfig struct {
 	Patterns    []string
-	Action      Action
+	Action      linkAction
 	WebhookName string
 	BotName     string
 }
@@ -32,15 +32,15 @@ type cleaner struct {
 
 type linkFeature struct {
 	cleaner     *cleaner
-	action      Action
+	action      linkAction
 	webhookName string
 	webhookMu   sync.Mutex
 	webhooks    map[string]*discordgo.Webhook
 	logger      *slog.Logger
-	config      Config
+	config      linkConfig
 }
 
-func Register(s *discordgo.Session, cfg Config, logger *slog.Logger) error {
+func linkFeatureRegister(s *discordgo.Session, cfg linkConfig, logger *slog.Logger) error {
 	c, err := newCleaner(cfg.Patterns...)
 	if err != nil {
 		return err
@@ -234,12 +234,18 @@ func noMentions() *discordgo.MessageAllowedMentions {
 }
 
 func authorDisplayName(event *discordgo.MessageCreate, defaultName string) string {
-	if event.Member != nil && event.Member.Nick != "" { return event.Member.Nick }
-	if event.Author != nil { return event.Author.DisplayName() }
+	if event.Member != nil && event.Member.Nick != "" {
+		return event.Member.Nick
+	}
+	if event.Author != nil {
+		return event.Author.DisplayName()
+	}
 	return defaultName
 }
 
 func authorAvatarURL(event *discordgo.MessageCreate) string {
-	if event.Author == nil { return "" }
+	if event.Author == nil {
+		return ""
+	}
 	return event.Author.AvatarURL("")
 }

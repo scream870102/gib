@@ -7,8 +7,6 @@ import (
 	"os/signal"
 	"syscall"
 
-	"gib/internal/links"
-
 	"github.com/bwmarrin/discordgo"
 )
 
@@ -31,7 +29,7 @@ func main() {
 		discordgo.IntentsGuildMessages |
 		discordgo.IntentsMessageContent
 
-	if err := links.Register(session, cfg.linkConfig, logger); err != nil {
+	if err := linkFeatureRegister(session, cfg.linkConfig, logger); err != nil {
 		logger.Error("register link cleaner", "error", err)
 		os.Exit(1)
 	}
