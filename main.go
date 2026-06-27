@@ -27,10 +27,15 @@ func main() {
 
 	session.Identify.Intents = discordgo.IntentsGuilds |
 		discordgo.IntentsGuildMessages |
-		discordgo.IntentsMessageContent
+		discordgo.IntentsMessageContent |
+		discordgo.IntentsGuildMessageReactions
 
 	if err := linkFeatureRegister(session, cfg.linkConfig, logger); err != nil {
 		logger.Error("register link cleaner", "error", err)
+		os.Exit(1)
+	}
+	if err := reactionRoleFeatureRegister(session, cfg.reactionRole, logger); err != nil {
+		logger.Error("register reaction roles", "error", err)
 		os.Exit(1)
 	}
 

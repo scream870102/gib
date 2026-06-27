@@ -12,10 +12,11 @@ const defaultWebhookName = "gib"
 const defaultBotName = "gib"
 
 type config struct {
-	token       string
-	linkConfig  linkConfig
-	webhookName string
-	botName     string
+	token        string
+	linkConfig   linkConfig
+	reactionRole reactionRoleConfig
+	webhookName  string
+	botName      string
 }
 
 func loadConfig() (config, error) {
@@ -37,6 +38,10 @@ func loadConfig() (config, error) {
 			Action:      linkAction(rawAction),
 			WebhookName: envOrDefault("WEBHOOK_NAME", defaultWebhookName),
 			BotName:     envOrDefault("DEFAULT_BOT_NAME", defaultBotName),
+		},
+		reactionRole: reactionRoleConfig{
+			StateFile:      envOrDefault("REACTION_ROLE_STATE_FILE", "data/reactionroles.json"),
+			CommandGuildID: strings.TrimSpace(os.Getenv("COMMAND_GUILD_ID")),
 		},
 		webhookName: envOrDefault("WEBHOOK_NAME", defaultWebhookName),
 		botName:     envOrDefault("DEFAULT_BOT_NAME", defaultBotName),

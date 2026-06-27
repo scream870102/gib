@@ -68,12 +68,29 @@ CLEAN_LINK_REGEX_2=(?i)^(https?://(?:www\.)?instagram\.com/[^\s<>()?]+/)\?igsh=[
 在 Discord Developer Portal 裡：
 
 1. 開啟 `MESSAGE CONTENT INTENT`，否則 bot 讀不到一般訊息內容。
-2. 邀請 bot 時選 `bot` scope。
+2. 邀請 bot 時選 `bot` 和 `applications.commands` scope。
 3. 基本權限至少給 `View Channel`、`Read Message History`、`Send Messages`。
 4. 若使用 `BOT_ACTION=delete-repost`，再加 `Manage Messages`。
 5. 若使用 `BOT_ACTION=webhook-repost`，再加 `Manage Messages` 和 `Manage Webhooks`。
 6. 若語音頻道文字聊天收不到訊息，確認該語音頻道也讓 bot 看得到頻道；必要時給 `Connect`。如果 Discord 不允許在該頻道建立 webhook，log 會顯示 webhook 建立失敗，這時可退回 `delete-repost`。
 
+## 表情符號身分組
+
+此功能使用 slash 指令 `/reactionrole`。只有具備 `Manage Roles` 權限的成員能使用，回覆都是 ephemeral，只有執行者看得到。
+
+```text
+/reactionrole map-add emoji:<表情> role:<身分組>
+/reactionrole map-remove emoji:<表情>
+/reactionrole list
+/reactionrole bind message:<訊息連結或ID>
+/reactionrole unbind message:<訊息連結或ID>
+```
+
+每個伺服器共用一張 `emoji -> role` 對應表。`bind` 指定的訊息會成為反應面板，使用者加上表內表情符號時會取得對應身分組，移除反應時會移除身分組。`map-add` 會把新表情補貼到所有已指定面板，`map-remove` 會移除 bot 自己在面板上的種子反應。
+
+bot 需要 `Manage Roles`、`Add Reactions`、`View Channel`、`Read Message History`。Discord 角色階層也必須正確：bot 的最高身分組要高於所有要發放的身分組，否則 Discord 會回 403。這個功能不需要開啟 `SERVER MEMBERS INTENT`。
+
+設定會寫到 `REACTION_ROLE_STATE_FILE`，Docker 預設建議用 `/data/reactionroles.json`，並掛載 `/data` volume 才能在重啟後保留資料。`COMMAND_GUILD_ID` 可填測試伺服器 ID，讓 slash 指令即時註冊；留空時會註冊全域指令，Discord 最久可能約 1 小時才更新。
 ## 本機執行
 
 ```powershell
@@ -95,3 +112,4 @@ go run .
 docker compose up -d --build
 docker compose logs -f gib
 ```
+

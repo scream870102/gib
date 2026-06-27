@@ -14,6 +14,8 @@ FROM alpine:3.20
 
 RUN apk add --no-cache ca-certificates \
 	&& adduser -D -H -s /sbin/nologin app
+RUN mkdir -p /data && chown app /data
+VOLUME ["/data"]
 
 COPY --from=build /out/gib /usr/local/bin/gib
 

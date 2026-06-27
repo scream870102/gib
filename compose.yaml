@@ -5,3 +5,8 @@ services:
     restart: unless-stopped
     env_file:
       - .env
+    volumes:
+      - gib-data:/data
+
+volumes:
+  gib-data:
