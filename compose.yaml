@@ -6,7 +6,4 @@ services:
     env_file:
       - .env
     volumes:
-      - gib-data:/data
-
-volumes:
-  gib-data:
+      - /volume1/docker/gib/data:/data
