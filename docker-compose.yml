@@ -3,7 +3,8 @@ services:
     build: .
     container_name: gib
     restart: unless-stopped
-    env_file:
-      - .env
+    # uncomment this if you have a physical env file in the same directory as the docker-compose.yml
+    # env_file:
+    #   - .env
     volumes:
       - /volume1/docker/gib/data:/data
