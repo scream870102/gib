@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"time"
 )
 
 const defaultWebhookName = "gib"
@@ -26,6 +27,10 @@ func loadConfig() (config, error) {
 	}
 
 	rawAction := strings.ToLower(envOrDefault("BOT_ACTION", string(ActionReply)))
+	syncInterval, err := reactionRoleSyncIntervalFromEnv()
+	if err != nil {
+		return config{}, err
+	}
 	patterns, err := linkPatternsFromEnv()
 	if err != nil {
 		return config{}, err
@@ -40,8 +45,11 @@ func loadConfig() (config, error) {
 			BotName:     envOrDefault("DEFAULT_BOT_NAME", defaultBotName),
 		},
 		reactionRole: reactionRoleConfig{
-			StateFile:      envOrDefault("REACTION_ROLE_STATE_FILE", "data/reactionroles.json"),
-			CommandGuildID: strings.TrimSpace(os.Getenv("COMMAND_GUILD_ID")),
+			StateDir:          envOrDefault("REACTION_ROLE_STATE_DIR", "data/reactionroles"),
+			LegacyStateFile:   envOrDefault("REACTION_ROLE_STATE_FILE", "data/reactionroles.json"),
+			RemoteDatabaseURL: strings.TrimSpace(os.Getenv("REACTION_ROLE_REMOTE_DATABASE_URL")),
+			SyncInterval:      syncInterval,
+			CommandGuildID:    strings.TrimSpace(os.Getenv("COMMAND_GUILD_ID")),
 		},
 		webhookName: envOrDefault("WEBHOOK_NAME", defaultWebhookName),
 		botName:     envOrDefault("DEFAULT_BOT_NAME", defaultBotName),
@@ -53,6 +61,21 @@ func loadConfig() (config, error) {
 	default:
 		return config{}, fmt.Errorf("invalid BOT_ACTION")
 	}
+}
+
+func reactionRoleSyncIntervalFromEnv() (time.Duration, error) {
+	raw := strings.TrimSpace(os.Getenv("REACTION_ROLE_SYNC_INTERVAL"))
+	if raw == "" {
+		return 15 * time.Minute, nil
+	}
+	interval, err := time.ParseDuration(raw)
+	if err != nil {
+		return 0, fmt.Errorf("invalid REACTION_ROLE_SYNC_INTERVAL: %w", err)
+	}
+	if interval <= 0 {
+		return 0, errors.New("REACTION_ROLE_SYNC_INTERVAL must be positive")
+	}
+	return interval, nil
 }
 
 func linkPatternsFromEnv() ([]string, error) {

@@ -90,7 +90,9 @@ CLEAN_LINK_REGEX_2=(?i)^(https?://(?:www\.)?instagram\.com/[^\s<>()?]+/)\?igsh=[
 
 bot 需要 `Manage Roles`、`Add Reactions`、`View Channel`、`Read Message History`。Discord 角色階層也必須正確：bot 的最高身分組要高於所有要發放的身分組，否則 Discord 會回 403。這個功能不需要開啟 `SERVER MEMBERS INTENT`。
 
-設定會寫到 `REACTION_ROLE_STATE_FILE`，Docker 預設建議用 `/data/reactionroles.json`，並掛載 `/data` volume 才能在重啟後保留資料。`COMMAND_GUILD_ID` 可填測試伺服器 ID，讓 slash 指令即時註冊；留空時會註冊全域指令，Discord 最久可能約 1 小時才更新。
+設定會寫到 `REACTION_ROLE_STATE_DIR` 底下的 guild 分片 JSON，Docker 預設建議用 `/data/reactionroles/<guild_id>.json`，並掛載 `/data` volume 才能在重啟後保留資料。舊的 `REACTION_ROLE_STATE_FILE` 只作為一次性遷移來源：如果分片資料夾還沒有任何 `*.json`，啟動時會把舊 `/data/reactionroles.json` 拆成多個 guild 檔案，之後不再寫回舊檔。`COMMAND_GUILD_ID` 可填測試伺服器 ID，讓 slash 指令即時註冊；留空時會註冊全域指令，Discord 最久可能約 1 小時才更新。
+可選擇設定 `REACTION_ROLE_REMOTE_DATABASE_URL` 指向 Neon/Postgres。啟動時會自動建立 `reaction_role_guild_state` table，逐 guild 比較本地與遠端的 `updated_at`，用較新的資料補齊或覆蓋較舊的一邊。運行中 slash 指令只會把被修改的 guild 標記為 dirty，背景同步依 `REACTION_ROLE_SYNC_INTERVAL` 推送，預設 `15m`。遠端連不上只會記 log，bot 仍使用本地資料繼續運作，dirty guild 會留到下一次同步重試。
+
 ## 本機執行
 
 ```powershell

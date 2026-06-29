@@ -6,6 +6,7 @@ import (
 	"regexp"
 	"sort"
 	"strings"
+	"time"
 
 	"github.com/bwmarrin/discordgo"
 )
@@ -19,8 +20,11 @@ var (
 )
 
 type reactionRoleConfig struct {
-	StateFile      string
-	CommandGuildID string
+	StateDir          string
+	LegacyStateFile   string
+	RemoteDatabaseURL string
+	SyncInterval      time.Duration
+	CommandGuildID    string
 }
 
 type reactionRole struct {
@@ -30,10 +34,12 @@ type reactionRole struct {
 }
 
 func reactionRoleFeatureRegister(s *discordgo.Session, cfg reactionRoleConfig, logger *slog.Logger) error {
-	st, err := loadStore(cfg.StateFile)
+	st, err := loadStore(cfg)
 	if err != nil {
 		return err
 	}
+
+	startReactionRoleSyncer(st, cfg, logger)
 
 	rr := &reactionRole{
 		store:          st,
