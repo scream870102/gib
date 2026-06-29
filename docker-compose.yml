@@ -6,5 +6,18 @@ services:
     # uncomment this if you have a physical env file in the same directory as the docker-compose.yml
     # env_file:
     #   - .env
+    #
+    # comment environment block if you pass environment by .env file
+    environment:
+      DISCORD_BOT_TOKEN: ${DISCORD_BOT_TOKEN}
+      BOT_ACTION: ${BOT_ACTION:-reply}
+      WEBHOOK_NAME: ${WEBHOOK_NAME:-gib}
+      DEFAULT_BOT_NAME: ${DEFAULT_BOT_NAME:-gib}
+      CLEAN_LINK_REGEX: ${CLEAN_LINK_REGEX}
+      REACTION_ROLE_STATE_DIR: ${REACTION_ROLE_STATE_DIR:-/data/reactionroles}
+      REACTION_ROLE_STATE_FILE: ${REACTION_ROLE_STATE_FILE:-/data/reactionroles.json}
+      REACTION_ROLE_REMOTE_DATABASE_URL: ${REACTION_ROLE_REMOTE_DATABASE_URL}
+      REACTION_ROLE_SYNC_INTERVAL: ${REACTION_ROLE_SYNC_INTERVAL:-15m}
+      COMMAND_GUILD_ID: ${COMMAND_GUILD_ID}
     volumes:
       - /volume1/docker/gib/data:/data
